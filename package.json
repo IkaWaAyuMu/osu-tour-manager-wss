@@ -4,7 +4,7 @@
     "description": "Websocket server that handle osu! tournament component.",
     "main": "dist/index.ts",
     "scripts": {
-        "start": "tsc && node dist/index.js"
+        "start": "yarn tsc && node dist/index.js"
     },
     "author": "IkaWaAyuMu",
     "license": "MIT",
