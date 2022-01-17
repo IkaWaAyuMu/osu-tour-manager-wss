@@ -3,6 +3,9 @@
     "version": "0.0.1",
     "description": "Websocket server that handle osu! tournament component.",
     "main": "dist/index.ts",
+    "scripts": {
+        "start": "tsc && node dist/index.js"
+    },
     "author": "IkaWaAyuMu",
     "license": "MIT",
     "devDependencies": {
