@@ -1,0 +1,17 @@
+{
+    "name": "osu-tour-manager-wss",
+    "version": "0.0.1",
+    "description": "Websocket server that handle osu! tournament component.",
+    "main": "dist/index.ts",
+    "author": "IkaWaAyuMu",
+    "license": "MIT",
+    "devDependencies": {
+        "typescript": "^4.5.4"
+    },
+    "dependencies": {
+        "@types/express": "^4.17.13",
+        "@types/ws": "^8.2.2",
+        "express": "^4.17.2",
+        "ws": "^8.4.2"
+    }
+}
