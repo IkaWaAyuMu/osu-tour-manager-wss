@@ -1,0 +1,94 @@
+{
+    "maps": [{
+            "Mod": "NM1",
+            "Artist": "Sagara Kokoro",
+            "Song": "Hoshizora no Ima",
+            "Diff": "Hinsvar's Insane",
+            "Id": 399055
+        },
+        {
+            "Mod": "NM2",
+            "Artist": "Memme",
+            "Song": "Avalanche",
+            "Diff": "Insane",
+            "Id": 1295717
+        },
+        {
+            "Mod": "NM3",
+            "Artist": "Koizumi Hanayo(CV.Kubo Yurika)",
+            "Song": "Kodoku na Heaven",
+            "Diff": "Extreme",
+            "Id": 946064
+        },
+        {
+            "Mod": "NM4",
+            "Artist": "YUC'e",
+            "Song": "POISON -KO3 Remix-",
+            "Diff": "Insane",
+            "Id": 2044890
+        },
+        {
+            "Mod": "HD1",
+            "Artist": "ALiCE'S EMOTiON",
+            "Song": "Mami Mami Zone",
+            "Diff": "0108",
+            "Id": 147377
+        },
+        {
+            "Mod": "HD2",
+            "Artist": "L.E.D.",
+            "Song": "HE LAST STRIKER",
+            "Diff": "Regou's Hyper",
+            "Id": 2270812
+        },
+        {
+            "Mod": "HR1",
+            "Artist": "MIMI feat. Hatsune Miku",
+            "Song": "Mizuoto to Curtain",
+            "Diff": "Insane",
+            "Id": 2096799
+        },
+        {
+            "Mod": "HR2",
+            "Artist": "lol",
+            "Song": "power of the dream",
+            "Diff": "roflmao",
+            "Id": 1954108
+        },
+        {
+            "Mod": "DT1",
+            "Artist": "Xiao Qiong (CV: KSP)",
+            "Song": "Xia Yi Zhan. Yu Ni",
+            "Diff": "Insane",
+            "Id": 760534
+        },
+        {
+            "Mod": "DT2",
+            "Artist": "EYE_XY feat. Yoneko",
+            "Song": "Knight of Firmament",
+            "Diff": "Hard",
+            "Id": 1600820
+        },
+        {
+            "Mod": "FM1",
+            "Artist": "Minato Aqua",
+            "Song": "One Room Sugar Life",
+            "Diff": "Insane",
+            "Id": 2563888
+        },
+        {
+            "Mod": "FM2",
+            "Artist": "solfa feat. Shimotsuki Haruka",
+            "Song": "leap in your mind",
+            "Diff": "Gust's Hyper",
+            "Id": 1949167
+        },
+        {
+            "Mod": "TB",
+            "Artist": "Haruka Sora, Kotorii Yuuka, Kamishiro Misaki, Kiritani Hana",
+            "Song": "Noraneko Heart (Epsilon Remix)",
+            "Diff": "Collab",
+            "Id": 1702151
+        }
+    ]
+}
