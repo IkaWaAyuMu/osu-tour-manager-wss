@@ -2,9 +2,9 @@
     "name": "osu-tour-manager-wss",
     "version": "0.0.1",
     "description": "Websocket server that handle osu! tournament component.",
-    "main": "dist/index.ts",
+    "main": "dist/index.js",
     "scripts": {
-        "start": "yarn tsc && nodemon --watch src --exec \"yarn tsc\""
+        "start": "yarn tsc && nodemon --watch src --exec \"yarn tsc && node dist/index.js\""
     },
     "author": "IkaWaAyuMu",
     "license": "MIT",
