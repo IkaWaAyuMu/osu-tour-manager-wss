@@ -5,5 +5,5 @@ export default interface OsuTourManagerWebSocketServerMessage {
      *                  "getMapMod" Get map num from mappool.
      */
     message : "getMappool" | "getMapMod",
-    MapID? : Number
+    mapID? : Number
 }
