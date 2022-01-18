@@ -2,10 +2,11 @@ import serverConfig from "./config/config.json";
 
 import Express from "express";
 import { WebSocketServer } from "ws";
-import OsuTourManagerWebSocketServerMessage from "./components/interfaces/OsuTourManagerWebSocketServerMessage";
+import OsuTourManagerWebSocketServerMessage from "./interfaces/OsuTourManagerWebSocketServerMessage";
 
-import MappoolData from "./components/interfaces/mappoolData";
+import MappoolData from "./interfaces/mappoolData";
 import mappoolsData from "./fetchdata/mappools.json"
+import sendStrictMessage from "./interfaces/OsuTourManagerWebSocketServer";
 
 
 const server = Express().listen(serverConfig.port);
@@ -30,7 +31,7 @@ webSocketServer.on('connection', (ws) => {
                 ws.send("MAPPOOL");
                 break;
             case "getMapMod" :
-                ws.send(getMapMod(parsedMessage.MapID));
+                sendStrictMessage(ws, {mapMod: getMapMod(parsedMessage.mapID)});
                 break;
             default:
                 break;
