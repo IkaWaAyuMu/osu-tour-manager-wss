@@ -19,7 +19,7 @@ var match: {
 var matchIndex: {
     round: number,
     match: number,
-} = { round: -1, match: -2 };
+} = { round: -1, match: -1 };
 console.log("START");
 
 webSocketServer.on('connection', (ws) => {
@@ -81,26 +81,33 @@ webSocketServer.on('connection', (ws) => {
                     let tourData: TourData[] = require("./fetchData/tourData.json");
                     if (tourData === undefined) throw new Error("Data not found.");
                     tourData.forEach((e, i) => {
+                        let isComplete: boolean = false;
                         if (e.round === parsedMessage.match.round) {
-                            if (tourData[i].matches === undefined) throw new Error("No match available for specified round.");
+                            if (tourData[i].matches === undefined){
+                                match = {round: parsedMessage.match.round, match: ""};
+                                matchIndex = { round: i, match: -1 };
+                                sendStrictMessage(ws, { message: "setMatch", status: 1 });
+                                throw new Error("No match available for specified round.");
+                            }
                             tourData[i].matches.forEach((m, j) => {
                                 if (m.match === parsedMessage.match.match) {
                                     match = parsedMessage.match;
                                     matchIndex = { round: i, match: j };
                                     sendStrictMessage(ws, { message: "setMatch", status: 0 });
-                                    throw new Error("OK");
+                                    isComplete = true;
                                 }
-                                if (m === tourData[i].matches[tourData[i].matches.length - 1]) {console.log("OK"); throw new Error("Match not found.");}
+                                if (m === tourData[i].matches[tourData[i].matches.length - 1] && !isComplete) { throw new Error("Match not found.");}
                             });
                         }
-                        if (i === tourData.length - 1) throw new Error("Round not found.");
+                        if (i === tourData.length - 1 && !isComplete) throw new Error("Round not found.");
                     });
                 } catch (error) {
                     if (error !== "OK") sendStrictMessage(ws, { message: "setMatch", status: 1, error: error });
                 }
                 break;
             case "getMatch":
-                if (match === undefined || (matchIndex.round < 0 && matchIndex.match < -1)) sendStrictMessage(ws, { message: "getTourData", status: 1, error: "Match not selected." });
+                if (match === undefined || (matchIndex.round < 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getTourData", status: 1, error: "Match not selected." });
+                if (match === undefined || (matchIndex.round >= 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getTourData", status: 1, error: "Match not selected." });
                 else sendStrictMessage(ws, { message: "getMatch", status: 0, match: match });
             default:
                 break;
