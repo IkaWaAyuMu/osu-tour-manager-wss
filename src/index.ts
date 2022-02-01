@@ -19,7 +19,7 @@ var match: {
 var matchIndex: {
     round: number,
     match: number,
-} = { round: -1, match: -1 };
+} = { round: -1, match: -2 };
 console.log("START");
 
 webSocketServer.on('connection', (ws) => {
@@ -37,6 +37,7 @@ webSocketServer.on('connection', (ws) => {
         switch (parsedMessage.message) {
             case "fetchTourData":
                 ParseSheet();
+                delete require.cache[require.resolve("./fetchData/tourData.json")]
                 let tourData: TourData[] = require("./fetchData/tourData.json");
                 if (tourData === undefined) throw new Error("Data not found.");
                 try {
@@ -61,9 +62,11 @@ webSocketServer.on('connection', (ws) => {
                 break;
             case "getTourData":
                 try {
+                    delete require.cache[require.resolve("./fetchData/tourData.json")]
                     let tourData: TourData[] = require("./fetchData/tourData.json");
                     if (tourData !== undefined) sendStrictMessage(ws, { message: "getTourData", status: 0, tourData: tourData });
                     else throw new Error("Data not found.");
+                    console.log(tourData);
                 } catch (error) {
                     sendStrictMessage(ws, { message: "getTourData", status: 1, error: error });
                 }
@@ -74,6 +77,7 @@ webSocketServer.on('connection', (ws) => {
             case "setMatch":
                 try {
                     if (parsedMessage.match === undefined) throw new Error("No round chosen.");
+                    delete require.cache[require.resolve("./fetchData/tourData.json")]
                     let tourData: TourData[] = require("./fetchData/tourData.json");
                     if (tourData === undefined) throw new Error("Data not found.");
                     tourData.forEach((e, i) => {
@@ -86,7 +90,7 @@ webSocketServer.on('connection', (ws) => {
                                     sendStrictMessage(ws, { message: "setMatch", status: 0 });
                                     throw new Error("OK");
                                 }
-                                if (m === tourData[i].matches[tourData[i].matches.length - 1]) throw new Error("Match not found.");
+                                if (m === tourData[i].matches[tourData[i].matches.length - 1]) {console.log("OK"); throw new Error("Match not found.");}
                             });
                         }
                         if (i === tourData.length - 1) throw new Error("Round not found.");
@@ -96,7 +100,7 @@ webSocketServer.on('connection', (ws) => {
                 }
                 break;
             case "getMatch":
-                if (match === undefined || (matchIndex.round < 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getTourData", status: 1, error: "Match not selected." });
+                if (match === undefined || (matchIndex.round < 0 && matchIndex.match < -1)) sendStrictMessage(ws, { message: "getTourData", status: 1, error: "Match not selected." });
                 else sendStrictMessage(ws, { message: "getMatch", status: 0, match: match });
             default:
                 break;
@@ -105,6 +109,7 @@ webSocketServer.on('connection', (ws) => {
 });
 
 function getMapMod(mapID: string): string {
+    delete require.cache[require.resolve("./fetchData/tourData.json")]
     let tourData: TourData[] = require("./fetchData/tourData.json");
     let mapMod: string = "NONE";
     if (matchIndex.round < 0) return mapMod;
