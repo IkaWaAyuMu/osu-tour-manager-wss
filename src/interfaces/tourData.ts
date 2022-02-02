@@ -16,5 +16,7 @@ export default interface TourData
         streamer?: string,
         comms1?: string,
         comms2?: string
+        leftScore?: number,
+        rightScore?: number
     }[]
 }
