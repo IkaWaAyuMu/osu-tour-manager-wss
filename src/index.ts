@@ -66,7 +66,6 @@ webSocketServer.on('connection', (ws) => {
                     let tourData: TourData[] = require("./fetchData/tourData.json");
                     if (tourData !== undefined) sendStrictMessage(ws, { message: "getTourData", status: 0, tourData: tourData });
                     else throw new Error("Data not found.");
-                    console.log(tourData);
                 } catch (error) {
                     sendStrictMessage(ws, { message: "getTourData", status: 1, error: error });
                 }
@@ -80,14 +79,15 @@ webSocketServer.on('connection', (ws) => {
                     delete require.cache[require.resolve("./fetchData/tourData.json")]
                     let tourData: TourData[] = require("./fetchData/tourData.json");
                     if (tourData === undefined) throw new Error("Data not found.");
-                    tourData.forEach((e, i) => {
+                    if (parsedMessage.match.round === "") throw new Error("Round not found.");
+                    else tourData.forEach((e, i) => {
                         let isComplete: boolean = false;
                         if (e.round === parsedMessage.match.round) {
-                            if (tourData[i].matches === undefined){
+                            if (parsedMessage.match || tourData[i].matches === undefined){
                                 match = {round: parsedMessage.match.round, match: ""};
                                 matchIndex = { round: i, match: -1 };
                                 sendStrictMessage(ws, { message: "setMatch", status: 1 });
-                                throw new Error("No match available for specified round.");
+                                throw new Error("No match available for specified round, Round set.");
                             }
                             tourData[i].matches.forEach((m, j) => {
                                 if (m.match === parsedMessage.match.match) {
@@ -106,8 +106,8 @@ webSocketServer.on('connection', (ws) => {
                 }
                 break;
             case "getMatch":
-                if (match === undefined || (matchIndex.round < 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getTourData", status: 1, error: "Match not selected." });
-                if (match === undefined || (matchIndex.round >= 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getTourData", status: 1, error: "Match not selected." });
+                if (match === undefined || (matchIndex.round < 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatch", status: 1, error: "Match not selected." });
+                if (match === undefined || (matchIndex.round >= 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatch", match: match, status: 1, error: "Match not selected." });
                 else sendStrictMessage(ws, { message: "getMatch", status: 0, match: match });
             default:
                 break;
