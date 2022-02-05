@@ -52,8 +52,7 @@ webSocketServer.on('connection', (ws) => {
                         if (i === tourData.length - 1) throw new Error("Round not found.");
                     });
                 } catch (error) {
-                    if (error !== "OK") 
-                    {
+                    if (error !== "OK") {
                         match = { round: "", match: "" };
                         matchIndex = { round: -1, match: -1 };
                     }
@@ -80,29 +79,31 @@ webSocketServer.on('connection', (ws) => {
                     let tourData: TourData[] = require("./fetchData/tourData.json");
                     if (tourData === undefined) throw new Error("Data not found.");
                     if (parsedMessage.match.round === "") throw new Error("Round not found.");
-                    else tourData.forEach((e, i) => {
+                    else {
                         let isComplete: boolean = false;
-                        if (e.round === parsedMessage.match.round) {
-                            if (parsedMessage.match || tourData[i].matches === undefined){
-                                match = {round: parsedMessage.match.round, match: ""};
-                                matchIndex = { round: i, match: -1 };
-                                sendStrictMessage(ws, { message: "setMatch", status: 1 });
-                                throw new Error("No match available for specified round, Round set.");
-                            }
-                            tourData[i].matches.forEach((m, j) => {
-                                if (m.match === parsedMessage.match.match) {
-                                    match = parsedMessage.match;
-                                    matchIndex = { round: i, match: j };
-                                    sendStrictMessage(ws, { message: "setMatch", status: 0 });
-                                    isComplete = true;
+                        tourData.forEach((e, i) => {
+                            if (e.round === parsedMessage.match.round) {
+                                if (parsedMessage.match.match === "" || tourData[i].matches === undefined) {
+                                    match = { round: parsedMessage.match.round, match: "" };
+                                    matchIndex = { round: i, match: -1 };
+                                    sendStrictMessage(ws, { message: "setMatch", status: 1 });
+                                    throw new Error("No match available for specified round, Round set.");
                                 }
-                                if (m === tourData[i].matches[tourData[i].matches.length - 1] && !isComplete) { throw new Error("Match not found.");}
-                            });
-                        }
-                        if (i === tourData.length - 1 && !isComplete) throw new Error("Round not found.");
-                    });
+                                tourData[i].matches.forEach((m, j) => {
+                                    if (m.match === parsedMessage.match.match) {
+                                        match = parsedMessage.match;
+                                        matchIndex = { round: i, match: j };
+                                        sendStrictMessage(ws, { message: "setMatch", status: 0 });
+                                        isComplete = true;
+                                    }
+                                    if (m === tourData[i].matches[tourData[i].matches.length - 1] && !isComplete) { throw new Error("Match not found."); }
+                                });
+                            }
+                            if (i === tourData.length - 1 && !isComplete) throw new Error("Round not found.");
+                        });
+                    }
                 } catch (error) {
-                    if (error !== "OK") sendStrictMessage(ws, { message: "setMatch", status: 1, error: error });
+                    if (error !== "OK") { console.log(`Send ${error}`); sendStrictMessage(ws, { message: "setMatch", status: 1, error: error }); }
                 }
                 break;
             case "getMatch":
