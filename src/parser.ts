@@ -22,7 +22,7 @@ export default function ParseSheet(sheetID: string = sheetParserConfig.sheetID):
                     if (match.round === round.round) { round.matches.push({
                         match: match.match,
                         dateTime: combineDateTime(match.date, match.time),
-                        leftSide: match.leftside,
+                        leftSide: match.leftSide,
                         rightSide: match.rightSide,
                         referee: match.referee,
                         streamer: match.streamer,
