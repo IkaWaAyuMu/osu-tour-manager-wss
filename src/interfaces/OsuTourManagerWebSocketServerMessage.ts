@@ -5,11 +5,15 @@ export default interface OsuTourManagerWebSocketServerMessage {
      *                  "getMappool" Get all maps in mappool in sellected round.
      *                  "getMapMod" Get map num from mappool.
      */
-    message : "fetchTourData" | "getTourData" | "getMapMod" | "setMatch" | "getMatch",
+    message : "fetchTourData" | "getTourData" | "getMapMod" | "setMatch" | "setMatchIndex" | "getMatch" | "getMatchIndex" | "getMatchInfo",
     /** Selected round/match. */
     match?: {
         round: string,
-        match: string, 
+        match: string,
+    },
+    matchIndex?: {
+        round: number,
+        match: number, 
     },
     /** Map ID to get map mod. */
     mapID? : string
