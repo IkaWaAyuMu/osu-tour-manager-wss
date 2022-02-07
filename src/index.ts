@@ -113,6 +113,13 @@ webSocketServer.on('connection', (ws) => {
                 if (match === undefined || (matchIndex.round < 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatch", status: 4, error: "Match not selected." });
                 if (match === undefined || (matchIndex.round >= 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatch", match: match, status: 4, error: "Match not selected." });
                 else sendStrictMessage(ws, { message: "getMatch", status: 0, match: match });
+            case "getMatchIndex":
+                if (match === undefined || (matchIndex.round < 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatch", status: 1, matchIndex: matchIndex, error: "Match not selected." });
+                if (match === undefined || (matchIndex.round >= 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatch", match: match, matchIndex: matchIndex,  status: 1, error: "Match not selected." });
+                else sendStrictMessage(ws, {message: "getMatchIndex", status: 0, matchIndex: matchIndex})
+                break;
+            default:
+                break;
         }
     });
 });
