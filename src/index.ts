@@ -106,7 +106,8 @@ webSocketServer.on('connection', (ws) => {
                         });
                     }
                 } catch (error) {
-                    sendStrictMessage(ws, { message: "setMatch", status: 4, error: error });
+                    if (error = "Round not found.") sendStrictMessage(ws, { message: "setMatch", status: 1, error: "Round not found." });
+                    else sendStrictMessage(ws, { message: "setMatch", status: 4, error: error });
                 }
                 break;
             case "getMatch":
