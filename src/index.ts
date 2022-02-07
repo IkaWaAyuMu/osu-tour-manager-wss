@@ -66,7 +66,7 @@ webSocketServer.on('connection', (ws) => {
                     if (tourData !== undefined) sendStrictMessage(ws, { message: "getTourData", status: 0, tourData: tourData });
                     else throw new Error("Data not found.");
                 } catch (error) {
-                    sendStrictMessage(ws, { message: "getTourData", status: 1, error: error });
+                    sendStrictMessage(ws, { message: "getTourData", status: 2, error: error });
                 }
                 break;
             case "getMapMod":
@@ -74,19 +74,18 @@ webSocketServer.on('connection', (ws) => {
                 break;
             case "setMatch":
                 try {
-                    if (parsedMessage.match === undefined) throw new Error("No round chosen.");
+                    if (parsedMessage.match === undefined) { sendStrictMessage(ws, { message: "setMatch", status: 1, error: "No round chosen." }); break; }
                     delete require.cache[require.resolve("./fetchData/tourData.json")]
                     let tourData: TourData[] = require("./fetchData/tourData.json");
-                    if (tourData === undefined || tourData === []) throw new Error("Data not found.");
-                    if (parsedMessage.match.round === "") throw new Error("Round not found.");
-                    else {
+                    if (tourData === undefined || tourData === []) {sendStrictMessage(ws, { message: "setMatch", status: 2, error: "Data not found."}); break;}
+                    if (parsedMessage.match.round === "") { sendStrictMessage(ws, { message: "setMatch", status: 1, error: "Round not found." }); break;}
+                    {
                         let isComplete: boolean = false;
                         tourData.forEach((e, i) => {
                             if (e.round === parsedMessage.match.round) {
                                 if (parsedMessage.match.match === "" || tourData[i].matches === undefined) {
                                     match = { round: parsedMessage.match.round, match: "" };
                                     matchIndex = { round: i, match: -1 };
-                                    sendStrictMessage(ws, { message: "setMatch", status: 1 });
                                     throw new Error("No match available for specified round, Round set.");
                                 }
                                 tourData[i].matches.forEach((m, j) => {
@@ -96,19 +95,23 @@ webSocketServer.on('connection', (ws) => {
                                         sendStrictMessage(ws, { message: "setMatch", status: 0 });
                                         isComplete = true;
                                     }
-                                    if (m === tourData[i].matches[tourData[i].matches.length - 1] && !isComplete) { throw new Error("Match not found."); }
+                                    if (m === tourData[i].matches[tourData[i].matches.length - 1] && !isComplete) { 
+                                        match = { round: parsedMessage.match.round, match: "" };
+                                        matchIndex = { round: i, match: -1 };
+                                        throw new Error("Match not found. Round set."); 
+                                    }
                                 });
                             }
                             if (i === tourData.length - 1 && !isComplete) throw new Error("Round not found.");
                         });
                     }
                 } catch (error) {
-                    sendStrictMessage(ws, { message: "setMatch", status: 1, error: error });
+                    sendStrictMessage(ws, { message: "setMatch", status: 4, error: error });
                 }
                 break;
             case "getMatch":
-                if (match === undefined || (matchIndex.round < 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatch", status: 1, error: "Match not selected." });
-                if (match === undefined || (matchIndex.round >= 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatch", match: match, status: 1, error: "Match not selected." });
+                if (match === undefined || (matchIndex.round < 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatch", status: 4, error: "Match not selected." });
+                if (match === undefined || (matchIndex.round >= 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatch", match: match, status: 4, error: "Match not selected." });
                 else sendStrictMessage(ws, { message: "getMatch", status: 0, match: match });
         }
     });
