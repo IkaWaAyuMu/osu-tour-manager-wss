@@ -77,7 +77,7 @@ webSocketServer.on('connection', (ws) => {
                     if (parsedMessage.match === undefined) throw new Error("No round chosen.");
                     delete require.cache[require.resolve("./fetchData/tourData.json")]
                     let tourData: TourData[] = require("./fetchData/tourData.json");
-                    if (tourData === undefined) throw new Error("Data not found.");
+                    if (tourData === undefined || tourData === []) throw new Error("Data not found.");
                     if (parsedMessage.match.round === "") throw new Error("Round not found.");
                     else {
                         let isComplete: boolean = false;
@@ -110,8 +110,6 @@ webSocketServer.on('connection', (ws) => {
                 if (match === undefined || (matchIndex.round < 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatch", status: 1, error: "Match not selected." });
                 if (match === undefined || (matchIndex.round >= 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatch", match: match, status: 1, error: "Match not selected." });
                 else sendStrictMessage(ws, { message: "getMatch", status: 0, match: match });
-            default:
-                break;
         }
     });
 });
