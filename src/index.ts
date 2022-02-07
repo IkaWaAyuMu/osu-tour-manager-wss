@@ -103,7 +103,7 @@ webSocketServer.on('connection', (ws) => {
                         });
                     }
                 } catch (error) {
-                    if (error !== "OK") { console.log(`Send ${error}`); sendStrictMessage(ws, { message: "setMatch", status: 1, error: error }); }
+                    sendStrictMessage(ws, { message: "setMatch", status: 1, error: error });
                 }
                 break;
             case "getMatch":
