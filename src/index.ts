@@ -49,7 +49,10 @@ webSocketServer.on('connection', (ws) => {
                             if (tourData[i].matches === undefined) throw new Error("No match available for specified round.");
                             tourData[i].matches.forEach((m, j) => {
                                 if (m.match === parsedMessage.match.match) throw new Error("OK");
-                                if (m === tourData[i].matches[tourData[i].matches.length - 1]) throw new Error("Match not found.");
+                                if (m === tourData[i].matches[tourData[i].matches.length - 1]) {
+                                    draftData = [];
+                                    throw new Error("Match not found.");
+                                }
                             });
                         }
                         if (i === tourData.length - 1) throw new Error("Round not found.");
@@ -137,12 +140,12 @@ webSocketServer.on('connection', (ws) => {
                 else sendStrictMessage(ws, { message: "getMatchIndex", status: 0, matchIndex: matchIndex })
                 break;
             case "getMatchInfo":
-                {
-                    if (match === undefined || (matchIndex.round < 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatchInfo", status: 3, error: "Match not selected." });
-                    else if (match === undefined || (matchIndex.round >= 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatchInfo", status: 3, error: "Match not selected." });
-                    else {
-                        let matchData = tourData[matchIndex.round].matches[matchIndex.match];
-                        sendStrictMessage(ws, { message: "getMatchInfo", status: 0, matchInfo: {
+                if (match === undefined || (matchIndex.round < 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatchInfo", status: 3, error: "Match not selected." });
+                else if (match === undefined || (matchIndex.round >= 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatchInfo", status: 3, error: "Match not selected." });
+                else {
+                    let matchData = tourData[matchIndex.round].matches[matchIndex.match];
+                    sendStrictMessage(ws, {
+                        message: "getMatchInfo", status: 0, matchInfo: {
                             round: match.round,
                             match: match.match,
                             dateTime: matchData.dateTime,
@@ -154,7 +157,26 @@ webSocketServer.on('connection', (ws) => {
                             comms2: matchData.comms2,
                             leftScore: matchData.leftScore,
                             rightScore: matchData.rightScore
-                        }})
+                        }
+                    })
+                }
+                break;
+            case "appendDraftAction":
+                if (match === undefined || matchIndex.match < 0) sendStrictMessage(ws, { message: "appendDraftAction", status: 3, error: "Match not selected." }); 
+                else if (parsedMessage.draftAction === undefined) sendStrictMessage(ws, { message: "appendDraftAction", status: 1, error: "No action provide." });
+                else if (parsedMessage.draftAction.mapIndex < 0 || parsedMessage.draftAction.mapIndex >= tourData[matchIndex.round].maps.length) sendStrictMessage(ws, { message: "appendDraftAction", status: 1, error: "Invalid mapIndex" });
+                else {
+                    if (parsedMessage.draftAction.mapIndex === "PLACEHOLDER") draftData.push(parsedMessage.draftAction);
+                    for (let i=0; i<draftData.length; i++) {
+                        if (draftData[i].mapIndex === "PLACEHOLDER" && draftData[i].action === parsedMessage.draftAction.action) {
+                            draftData[i] = parsedMessage.draftAction;
+                            sendStrictMessage(ws, { message: "appendDraftAction", status: 0});
+                            break;
+                        }
+                        if (i === draftData.length -1) {
+                            draftData.push(parsedMessage.draftAction);
+                            sendStrictMessage(ws, { message: "appendDraftAction", status: 0});
+                        }
                     }
                 }
                 break;
@@ -164,7 +186,7 @@ webSocketServer.on('connection', (ws) => {
     });
 });
 
-function getMapMod(tourData:TourData[], mapID: string): string {
+function getMapMod(tourData: TourData[], mapID: string): string {
     let mapMod: string = "NONE";
     if (matchIndex.round < 0) return mapMod;
     if (mapID === undefined || tourData[matchIndex.round].maps === undefined) return mapMod;
