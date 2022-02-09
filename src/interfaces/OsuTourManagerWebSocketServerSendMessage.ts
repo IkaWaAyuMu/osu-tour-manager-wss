@@ -1,8 +1,9 @@
+import DraftData from "./draftData";
 import TourData from "./tourData";
 
 export default interface OsuTourManagerWebSocketServerSendMessage {
     /** Command message. */
-    message : "fetchTourData" | "getTourData" | "getMapMod" | "setMatch" | "setMatchIndex" | "getMatch" | "getMatchIndex" | "getMatchInfo",
+    message : "fetchTourData" | "getTourData" | "getMapMod" | "setMatch" | "setMatchIndex" | "getMatch" | "getMatchIndex" | "getMatchInfo" | "appendDraftAction" | "deleteDraftAction" | "deleteDraftActionIndex" | "getDraftData",
     /** Status of after the operation
      * @value 0 : Operation completed normally.
      * @value 1 : Invalid parameters.
@@ -37,6 +38,7 @@ export default interface OsuTourManagerWebSocketServerSendMessage {
         leftScore?: number,
         rightScore?: number 
     },
+    draftData?: DraftData[],
     /** Return Map mods value  from "getMapMod" */
     mapMod?: string
 }
