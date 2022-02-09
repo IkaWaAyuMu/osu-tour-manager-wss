@@ -7,6 +7,7 @@ import OsuTourManagerWebSocketServerMessage from "./interfaces/OsuTourManagerWeb
 import sendStrictMessage from "./interfaces/OsuTourManagerWebSocketServer";
 import ParseSheet from "./parser";
 import TourData from "./interfaces/tourData";
+import DraftData from "./interfaces/draftData";
 
 
 const server = Express().listen(serverConfig.port);
@@ -21,6 +22,7 @@ var matchIndex: {
     round: number,
     match: number,
 } = { round: -1, match: -1 };
+var draftData: DraftData[] = [];
 console.log("START");
 
 webSocketServer.on('connection', (ws) => {
@@ -83,18 +85,21 @@ webSocketServer.on('connection', (ws) => {
                                 if (parsedMessage.match.match === "" || tourData[i].matches === undefined) {
                                     match = { round: parsedMessage.match.round, match: "" };
                                     matchIndex = { round: i, match: -1 };
+                                    draftData = [];
                                     throw new Error("No match available for specified round, Round set.");
                                 }
                                 tourData[i].matches.forEach((m, j) => {
-                                    if (m.match === parsedMessage.match.match) {
+                                    if (!isComplete && m.match === parsedMessage.match.match) {
                                         match = parsedMessage.match;
                                         matchIndex = { round: i, match: j };
                                         sendStrictMessage(ws, { message: "setMatch", status: 0 });
+                                        draftData = [];
                                         isComplete = true;
                                     }
-                                    if (m === tourData[i].matches[tourData[i].matches.length - 1] && !isComplete) {
+                                    if (!isComplete && m === tourData[i].matches[tourData[i].matches.length - 1]) {
                                         match = { round: parsedMessage.match.round, match: "" };
                                         matchIndex = { round: i, match: -1 };
+                                        draftData = [];
                                         throw new Error("Match not found. Round set.");
                                     }
                                 });
