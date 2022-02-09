@@ -89,6 +89,7 @@ webSocketServer.on('connection', (ws) => {
                                     match = { round: parsedMessage.match.round, match: "" };
                                     matchIndex = { round: i, match: -1 };
                                     draftData = [];
+                                    sendStrictMessage(ws, { message: "getDraftData", status: 0, draftData: draftData });
                                     throw new Error("No match available for specified round, Round set.");
                                 }
                                 tourData[i].matches.forEach((m, j) => {
@@ -97,12 +98,14 @@ webSocketServer.on('connection', (ws) => {
                                         matchIndex = { round: i, match: j };
                                         sendStrictMessage(ws, { message: "setMatch", status: 0 });
                                         draftData = [];
+                                        sendStrictMessage(ws, { message: "getDraftData", status: 0, draftData: draftData });
                                         isComplete = true;
                                     }
                                     if (!isComplete && m === tourData[i].matches[tourData[i].matches.length - 1]) {
                                         match = { round: parsedMessage.match.round, match: "" };
                                         matchIndex = { round: i, match: -1 };
                                         draftData = [];
+                                        sendStrictMessage(ws, { message: "getDraftData", status: 0, draftData: draftData });
                                         throw new Error("Match not found. Round set.");
                                     }
                                 });
@@ -123,12 +126,16 @@ webSocketServer.on('connection', (ws) => {
                     if (parsedMessage.matchIndex.match < 0 || parsedMessage.matchIndex.match >= tourData[parsedMessage.matchIndex.round].matches.length) {
                         match = { round: tourData[parsedMessage.matchIndex.round].round, match: "" };
                         matchIndex = { round: parsedMessage.matchIndex.round, match: -1 };
-                        sendStrictMessage(ws, { message: "setMatchIndex", status: 1, error: "Match not found." });
+                        sendStrictMessage(ws, { message: "setMatchIndex", status: 1, error: "Match not found. Round set." });
+                        draftData = [];
+                        sendStrictMessage(ws, { message: "getDraftData", status: 0, draftData: draftData });
                         break;
                     }
                     match = { round: tourData[parsedMessage.matchIndex.round].round, match: tourData[parsedMessage.matchIndex.round].matches[parsedMessage.matchIndex.match].match };
                     matchIndex = { round: parsedMessage.matchIndex.round, match: parsedMessage.matchIndex.match };
                     sendStrictMessage(ws, { message: "setMatchIndex", status: 0 });
+                    draftData = [];
+                    sendStrictMessage(ws, { message: "getDraftData", status: 0, draftData: draftData });
                 }
             case "getMatch":
                 if (match === undefined || (matchIndex.round < 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatch", status: 4, error: "Match not selected." });
@@ -165,10 +172,14 @@ webSocketServer.on('connection', (ws) => {
                 if (match === undefined || matchIndex.match < 0) sendStrictMessage(ws, { message: "appendDraftAction", status: 3, error: "Match not selected." }); 
                 else if (parsedMessage.draftAction === undefined) sendStrictMessage(ws, { message: "appendDraftAction", status: 1, error: "No action provide." });
                 else if (parsedMessage.draftAction.mapIndex < 0 || parsedMessage.draftAction.mapIndex >= tourData[matchIndex.round].maps.length) sendStrictMessage(ws, { message: "appendDraftAction", status: 1, error: "Invalid mapIndex" });
+                else if (draftData.length <= 0) {
+                    draftData.push(parsedMessage.draftAction);
+                    sendStrictMessage(ws, { message: "appendDraftAction", status: 0});
+                }
                 else {
                     if (parsedMessage.draftAction.mapIndex === "PLACEHOLDER") draftData.push(parsedMessage.draftAction);
                     for (let i=0; i<draftData.length; i++) {
-                        if (draftData[i].mapIndex === "PLACEHOLDER" && draftData[i].action === parsedMessage.draftAction.action) {
+                        if (draftData[i].mapIndex === "PLACEHOLDER" && draftData[i].action === parsedMessage.draftAction.action && draftData[i].side === parsedMessage.draftAction.side) {
                             draftData[i] = parsedMessage.draftAction;
                             sendStrictMessage(ws, { message: "appendDraftAction", status: 0});
                             break;
@@ -176,9 +187,13 @@ webSocketServer.on('connection', (ws) => {
                         if (i === draftData.length -1) {
                             draftData.push(parsedMessage.draftAction);
                             sendStrictMessage(ws, { message: "appendDraftAction", status: 0});
+                            break;
                         }
                     }
                 }
+                break;
+            case "getDraftData":
+                sendStrictMessage(ws, { message: "getDraftData", status: 0, draftData: draftData });
                 break;
             default:
                 break;
