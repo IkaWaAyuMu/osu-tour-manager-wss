@@ -64,6 +64,14 @@ webSocketServer.on('connection', (ws) => {
                     }
                 }
                 sendStrictMessage(ws, { message: "fetchTourData", status: 0 });
+                for (const socket of webSocketServer.clients) {
+                    try {
+                        if (tourData !== undefined) sendStrictMessage(socket, { message: "getTourData", status: 0, tourData: tourData });
+                        else throw new Error("Data not found.");
+                    } catch (error) {
+                        sendStrictMessage(socket, { message: "getTourData", status: 2, error: error });
+                    }
+                }
                 break;
             case "getTourData":
                 try {
@@ -88,8 +96,6 @@ webSocketServer.on('connection', (ws) => {
                                 if (parsedMessage.match.match === "" || tourData[i].matches === undefined) {
                                     match = { round: parsedMessage.match.round, match: "" };
                                     matchIndex = { round: i, match: -1 };
-                                    draftData = [];
-                                    for (const socket of webSocketServer.clients )sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
                                     throw new Error("No match available for specified round, Round set.");
                                 }
                                 tourData[i].matches.forEach((m, j) => {
@@ -97,15 +103,17 @@ webSocketServer.on('connection', (ws) => {
                                         match = parsedMessage.match;
                                         matchIndex = { round: i, match: j };
                                         sendStrictMessage(ws, { message: "setMatch", status: 0 });
+                                        for (const socket of webSocketServer.clients) {
+                                            sendStrictMessage(socket, { message: "getMatch", status: 0, match: match });
+                                            sendStrictMessage(socket, { message: "getMatchIndex", status: 0, matchIndex: matchIndex })
+                                        }
                                         draftData = [];
-                                        for (const socket of webSocketServer.clients )sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
+                                        for (const socket of webSocketServer.clients) sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
                                         isComplete = true;
                                     }
                                     if (!isComplete && m === tourData[i].matches[tourData[i].matches.length - 1]) {
                                         match = { round: parsedMessage.match.round, match: "" };
                                         matchIndex = { round: i, match: -1 };
-                                        draftData = [];
-                                        for (const socket of webSocketServer.clients )sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
                                         throw new Error("Match not found. Round set.");
                                     }
                                 });
@@ -115,7 +123,15 @@ webSocketServer.on('connection', (ws) => {
                     }
                 } catch (error) {
                     if (error = "Round not found.") sendStrictMessage(ws, { message: "setMatch", status: 1, error: "Round not found." });
-                    else sendStrictMessage(ws, { message: "setMatch", status: 4, error: error });
+                    else {
+                        sendStrictMessage(ws, { message: "setMatch", status: 4, error: error });
+                        for (const socket of webSocketServer.clients) {
+                            sendStrictMessage(socket, { message: "getMatch", match: match, status: 4, error: "Match not selected." });
+                            sendStrictMessage(socket, { message: "getMatchIndex", status: 4, matchIndex: matchIndex, error: "Match not selected." })
+                        }
+                        draftData = [];
+                        for (const socket of webSocketServer.clients) sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
+                    }
                 }
                 break;
             case "setMatchIndex":
@@ -127,15 +143,23 @@ webSocketServer.on('connection', (ws) => {
                         match = { round: tourData[parsedMessage.matchIndex.round].round, match: "" };
                         matchIndex = { round: parsedMessage.matchIndex.round, match: -1 };
                         sendStrictMessage(ws, { message: "setMatchIndex", status: 1, error: "Match not found. Round set." });
+                        for (const socket of webSocketServer.clients) {
+                            sendStrictMessage(socket, { message: "getMatch", match: match, status: 4, error: "Match not selected." });
+                            sendStrictMessage(socket, { message: "getMatchIndex", status: 4, matchIndex: matchIndex, error: "Match not selected." })
+                        }
                         draftData = [];
-                        for (const socket of webSocketServer.clients )sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
+                        for (const socket of webSocketServer.clients) sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
                         break;
                     }
                     match = { round: tourData[parsedMessage.matchIndex.round].round, match: tourData[parsedMessage.matchIndex.round].matches[parsedMessage.matchIndex.match].match };
                     matchIndex = { round: parsedMessage.matchIndex.round, match: parsedMessage.matchIndex.match };
                     sendStrictMessage(ws, { message: "setMatchIndex", status: 0 });
+                    for (const socket of webSocketServer.clients) {
+                        sendStrictMessage(socket, { message: "getMatch", status: 0, match: match });
+                        sendStrictMessage(socket, { message: "getMatchIndex", status: 0, matchIndex: matchIndex })
+                    }
                     draftData = [];
-                    for (const socket of webSocketServer.clients )sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
+                    for (const socket of webSocketServer.clients) sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
                 }
             case "getMatch":
                 if (match === undefined || (matchIndex.round < 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatch", status: 4, error: "Match not selected." });
@@ -169,27 +193,27 @@ webSocketServer.on('connection', (ws) => {
                 }
                 break;
             case "appendDraftAction":
-                if (match === undefined || matchIndex.match < 0) sendStrictMessage(ws, { message: "appendDraftAction", status: 3, error: "Match not selected." }); 
+                if (match === undefined || matchIndex.match < 0) sendStrictMessage(ws, { message: "appendDraftAction", status: 3, error: "Match not selected." });
                 else if (parsedMessage.draftAction === undefined) sendStrictMessage(ws, { message: "appendDraftAction", status: 1, error: "No action provide." });
                 else if (parsedMessage.draftAction.mapIndex < 0 || parsedMessage.draftAction.mapIndex >= tourData[matchIndex.round].maps.length) sendStrictMessage(ws, { message: "appendDraftAction", status: 1, error: "Invalid mapIndex" });
                 else if (draftData.length <= 0) {
                     draftData.push(parsedMessage.draftAction);
-                    sendStrictMessage(ws, { message: "appendDraftAction", status: 0});
-                    for (const socket of webSocketServer.clients )sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
+                    sendStrictMessage(ws, { message: "appendDraftAction", status: 0 });
+                    for (const socket of webSocketServer.clients) sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
                 }
                 else {
                     if (parsedMessage.draftAction.mapIndex === "PLACEHOLDER") draftData.push(parsedMessage.draftAction);
-                    for (let i=0; i<draftData.length; i++) {
+                    for (let i = 0; i < draftData.length; i++) {
                         if (draftData[i].mapIndex === "PLACEHOLDER" && draftData[i].action === parsedMessage.draftAction.action && draftData[i].side === parsedMessage.draftAction.side) {
                             draftData[i] = parsedMessage.draftAction;
-                            sendStrictMessage(ws, { message: "appendDraftAction", status: 0});
-                            for (const socket of webSocketServer.clients )sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
+                            sendStrictMessage(ws, { message: "appendDraftAction", status: 0 });
+                            for (const socket of webSocketServer.clients) sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
                             break;
                         }
-                        if (i === draftData.length -1) {
+                        if (i === draftData.length - 1) {
                             draftData.push(parsedMessage.draftAction);
-                            sendStrictMessage(ws, { message: "appendDraftAction", status: 0});
-                            for (const socket of webSocketServer.clients )sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
+                            sendStrictMessage(ws, { message: "appendDraftAction", status: 0 });
+                            for (const socket of webSocketServer.clients) sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
                             break;
                         }
                     }
