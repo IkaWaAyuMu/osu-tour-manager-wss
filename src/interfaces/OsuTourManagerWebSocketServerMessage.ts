@@ -18,6 +18,7 @@ export default interface OsuTourManagerWebSocketServerMessage {
         match: number, 
     },
     draftAction?: DraftData,
+    draftActionIndex?: number,
     /** Map ID to get map mod. */
     mapID? : string
 }
