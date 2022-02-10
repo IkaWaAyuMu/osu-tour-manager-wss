@@ -175,6 +175,7 @@ webSocketServer.on('connection', (ws) => {
                 else if (draftData.length <= 0) {
                     draftData.push(parsedMessage.draftAction);
                     sendStrictMessage(ws, { message: "appendDraftAction", status: 0});
+                    for (const socket of webSocketServer.clients )sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
                 }
                 else {
                     if (parsedMessage.draftAction.mapIndex === "PLACEHOLDER") draftData.push(parsedMessage.draftAction);
@@ -182,11 +183,13 @@ webSocketServer.on('connection', (ws) => {
                         if (draftData[i].mapIndex === "PLACEHOLDER" && draftData[i].action === parsedMessage.draftAction.action && draftData[i].side === parsedMessage.draftAction.side) {
                             draftData[i] = parsedMessage.draftAction;
                             sendStrictMessage(ws, { message: "appendDraftAction", status: 0});
+                            for (const socket of webSocketServer.clients )sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
                             break;
                         }
                         if (i === draftData.length -1) {
                             draftData.push(parsedMessage.draftAction);
                             sendStrictMessage(ws, { message: "appendDraftAction", status: 0});
+                            for (const socket of webSocketServer.clients )sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
                             break;
                         }
                     }
