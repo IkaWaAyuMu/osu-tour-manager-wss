@@ -162,7 +162,7 @@ webSocketServer.on('connection', (ws) => {
                     for (const socket of webSocketServer.clients) sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
                 }
             case "getMatch":
-                if (match === undefined || (matchIndex.round < 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatch", status: 4, error: "Match not selected." });
+                if (match === undefined || (matchIndex.round < 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatch", match: match, status: 4, error: "Match not selected." });
                 if (match === undefined || (matchIndex.round >= 0 && matchIndex.match < 0)) sendStrictMessage(ws, { message: "getMatch", match: match, status: 4, error: "Match not selected." });
                 else sendStrictMessage(ws, { message: "getMatch", status: 0, match: match });
             case "getMatchIndex":
@@ -219,6 +219,18 @@ webSocketServer.on('connection', (ws) => {
                     }
                 }
                 break;
+            case "deleteDraftAction":
+                if (parsedMessage.draftAction === undefined) sendStrictMessage(ws, { message: "deleteDraftAction", status: 1, error: "No action provide." });
+                else if (draftData === undefined || draftData === []) sendStrictMessage(ws, { message: "deleteDraftAction", status: 4, error: "No action found."});
+                else for (let i = 0; i < draftData.length; i++) {
+                    if (parsedMessage.draftAction === draftData[i]) {
+                        draftData.splice(i, 1);
+                        sendStrictMessage(ws, { message: "deleteDraftAction", status: 0});
+                        for (const socket of webSocketServer.clients) sendStrictMessage(socket, { message: "getDraftData", status: 0, draftData: draftData });
+                        break;
+                    }
+                    if (i === draftData.length - 1 ) sendStrictMessage(ws, { message: "deleteDraftAction", status: 4, error: "No action found."});
+                }
             case "getDraftData":
                 sendStrictMessage(ws, { message: "getDraftData", status: 0, draftData: draftData });
                 break;
