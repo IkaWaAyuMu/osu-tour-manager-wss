@@ -2,6 +2,7 @@ export default interface MappoolData
 {
     maps : {
         mod: string,
-        mapID: string
+        mapID: string,
+        mapsetID: string
     }[]
 }

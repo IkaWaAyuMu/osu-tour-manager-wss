@@ -16,7 +16,7 @@ export default function ParseSheet(sheetID: string = sheetParserConfig.sheetID):
             new PublicGoogleSheetsParser(sheetID, 'ScheduleParseable').parse().then((scheduleData) => {
                 roundData.forEach(round => { tourData.push({round: round.round, bestOf: round.bestOf, banCount:round.bansCount, maps: [], matches: []}); });
                 mappoolData.forEach(map => { tourData.forEach(round => { 
-                    if (map.round === round.round) { round.maps.push({mod: map.mod, mapID: map.mapID.toString()}); return; }
+                    if (map.round === round.round) { round.maps.push({mod: map.mod, mapID: map.mapID.toString(), mapsetID: map.mapsetID.toString()}); return; }
                 });});
                 scheduleData.forEach(match => { tourData.forEach(round => { 
                     if (match.round === round.round) { round.matches.push({

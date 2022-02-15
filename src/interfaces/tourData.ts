@@ -5,7 +5,8 @@ export default interface TourData
     banCount?: number,
     maps: {
         mod: string,
-        mapID: string
+        mapID: string,
+        mapsetID: string
     }[]
     matches: {
         match: string,
