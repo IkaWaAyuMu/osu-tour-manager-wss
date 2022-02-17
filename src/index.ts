@@ -42,25 +42,12 @@ webSocketServer.on('connection', (ws) => {
                 ParseSheet();
                 delete require.cache[require.resolve("./fetchData/tourData.json")]
                 tourData = require("./fetchData/tourData.json");
-                if (tourData === undefined) throw new Error("Data not found.");
-                try {
-                    tourData.forEach((e, i) => {
-                        if (e.round === parsedMessage.match.round) {
-                            if (tourData[i].matches === undefined) throw new Error("No match available for specified round.");
-                            tourData[i].matches.forEach((m, j) => {
-                                if (m.match === parsedMessage.match.match) throw new Error("OK");
-                                if (m === tourData[i].matches[tourData[i].matches.length - 1]) {
-                                    draftData = [];
-                                    throw new Error("Match not found.");
-                                }
-                            });
-                        }
-                        if (i === tourData.length - 1) throw new Error("Round not found.");
-                    });
-                } catch (error) {
-                    if (error !== "OK") {
-                        match = { round: "", match: "" };
-                        matchIndex = { round: -1, match: -1 };
+                if (matchIndex.round < 0 || matchIndex.round >= tourData.length || matchIndex.match < 0 || matchIndex.match >= tourData[matchIndex.round].matches.length){
+                    match = { round: "", match: "" };
+                    matchIndex = { round: -1, match: -1 };
+                    for (const socket of webSocketServer.clients) {
+                        sendStrictMessage(socket, { message: "getMatch", status: 0, match: match });
+                        sendStrictMessage(socket, { message: "getMatchIndex", status: 0, matchIndex: matchIndex })
                     }
                 }
                 sendStrictMessage(ws, { message: "fetchTourData", status: 0 });
