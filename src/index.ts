@@ -239,7 +239,7 @@ webSocketServer.on('connection', (ws) => {
 });
 
 function getMapMod(tourData: TourData[], mapID: string): string {
-    let mapMod: string = "NONE";
+    let mapMod: string = "NA";
     if (matchIndex.round < 0) return mapMod;
     if (mapID === undefined || tourData[matchIndex.round].maps === undefined) return mapMod;
     tourData[matchIndex.round].maps.forEach(map => {
